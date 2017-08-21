@@ -1153,6 +1153,9 @@ MspHelper.prototype.process_data = function(dataHandler) {
             case MSPCodes.MSP_COPY_PROFILE:
                 console.log('Copy profile');
                 break;
+            case MSP_OPENTCO_CAMERA_FEATURES:
+                OPENTCO_CAMERA.supported_features.setMask(data.readU16());
+                break;
             default:
                 console.log('Unknown code detected: ' + code);
         } else {

@@ -56,6 +56,7 @@ var FILTER_CONFIG;
 var ADVANCED_TUNING;
 var SENSOR_CONFIG;
 var COPY_PROFILE;
+var OPENTCO_CAMERA;
 
 var FC = {
     resetState: function() {
@@ -392,5 +393,9 @@ var FC = {
         };
 
         RXFAIL_CONFIG = [];
+
+        OPENTCO_CAMERA = {
+            supported_features:         0,
+        };
     }
 };

@@ -15,7 +15,16 @@ TABS.auxiliary.initialize = function (callback) {
     }
 
     function get_rc_data() {
-        MSP.send_message(MSPCodes.MSP_RC, false, false, load_html);
+        var callback = load_html;
+        if (semver.gt(CONFIG.flightControllerVersion, "3.2.0")) {
+            callback = get_opentco_camera_features;
+        }
+
+        MSP.send_message(MSPCodes.MSP_RC, false, false, callback);
+    }
+    
+    function get_opentco_camera_features() {
+        MSP.send_message(MSPCodes.MSP_OPENTCO_CAMERA_FEATURES, false, false, load_html);
     }
 
     function load_html() {
@@ -37,16 +46,17 @@ TABS.auxiliary.initialize = function (callback) {
     }
 
     function adjustRunCamSplitBoxNameWithModeID(modeId, originalModeName) {
-        switch (modeId) {
-            case 32: // BOXCAMERA1
-                return "CAMERA WI-FI";
-            case 33: // BOXCAMERA2
-                return "CAMERA POWER";
-            case 34: // BOXCAMERA3
-                return "CAMERA CHANGE MODE"
-            default:
-                return originalModeName;
-        }
+        var adjustedName = originalModeName;
+        var isRCSplitConnected = isPeripheralSelected("RUNCAM_SPLIT_CONTROL");
+        
+        if (modeId == 32 && (isRCSplitConnected || OPENTCO_CAMERA.supported_features.isEnabled("SIMULATE_WIFI_BUTTON")))
+            adjustedName = "CAMERA WI-FI";
+        else if (modeId == 33 && (isRCSplitConnected || OPENTCO_CAMERA.supported_features.isEnabled("SIMULATE_POWER_BUTTON")))
+            adjustedName = "CAMERA POWER";
+        else if (modeId == 34 && (isRCSplitConnected || OPENTCO_CAMERA.supported_features.isEnabled("CHANGE_MODE")))
+            adjustedName = "CAMERA CHANGE MODE";
+
+        return adjustedName;
     }
 
     function createMode(modeIndex, modeId) {
@@ -54,10 +64,7 @@ TABS.auxiliary.initialize = function (callback) {
         var newMode = modeTemplate.clone();
         
         var modeName = AUX_CONFIG[modeIndex];
-        // if user choose the runcam split at peripheral column, then adjust the boxname(BOXCAMERA1, BOXCAMERA2, BOXCAMERA3)
-        if (isPeripheralSelected("RUNCAM_SPLIT_CONTROL")) {
-            modeName = adjustRunCamSplitBoxNameWithModeID(modeId, modeName);
-        }
+        modeName = adjustRunCamSplitBoxNameWithModeID(modeId, modeName);
 
         $(newMode).attr('id', 'mode-' + modeIndex);
         $(newMode).find('.name').text(modeName);

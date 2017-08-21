@@ -302,6 +302,7 @@ function onConnect() {
     if (CONFIG.flightControllerVersion !== '') {
         FEATURE_CONFIG.features = new Features(CONFIG);
         BEEPER_CONFIG.beepers = new Beepers(CONFIG);
+        OPENTCO_CAMERA.supported_features = new OpenTCOCamFeatures(CONFIG);
 
         $('#tabs ul.mode-connected').show();
 
